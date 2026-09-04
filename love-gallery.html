@@ -117,19 +117,40 @@
         const savePhotosBtn = document.getElementById('savePhotosBtn');
         const clearPhotosBtn = document.getElementById('clearPhotosBtn');
 
-        // 从localStorage获取照片
+        // 从localStorage获取照片（旧数据无id时自动补充）
         function getPhotos() {
-            const photos = localStorage.getItem('lovePhotos');
-            return photos ? JSON.parse(photos) : [];
+            let photos = [];
+            try {
+                photos = JSON.parse(localStorage.getItem('lovePhotos') || '[]');
+            } catch (e) { photos = []; }
+            // 给没有 id 的旧照片自动补充唯一 id
+            let needSave = false;
+            photos.forEach(p => {
+                if (!p.id) {
+                    p.id = Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+                    needSave = true;
+                }
+            });
+            if (needSave) {
+                try { localStorage.setItem('lovePhotos', JSON.stringify(photos)); } catch (e) {}
+            }
+            return photos;
         }
 
         // 保存照片到localStorage（同时推送到云端，与对方共享）
         function savePhotos(photos) {
-            localStorage.setItem('lovePhotos', JSON.stringify(photos));
+            try {
+                localStorage.setItem('lovePhotos', JSON.stringify(photos));
+            } catch (e) {
+                // localStorage 容量不足（通常5MB上限，base64照片较大）
+                alert('⚠️ 本地存储空间不足！照片较多时可能无法全部保存在本机。\n\n建议：\n1. 删除一些旧照片腾出空间\n2. 照片会自动同步到云端，对方设备上仍可查看');
+                return false;
+            }
             // 云端共享：异步推送，失败自动保留本地
             if (window.LoveCloud) {
                 LoveCloud.pushPhotos(photos);
             }
+            return true;
         }
 
         // 渲染照片网格
@@ -196,25 +217,32 @@
         });
 
         function handleFiles(files) {
-            const photos = getPhotos();
             const currentDate = new Date().toLocaleDateString('zh-CN');
+            const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
+            if (fileArray.length === 0) return;
 
-            for (let file of files) {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const photo = {
-                            url: e.target.result,
-                            date: currentDate,
-                            name: file.name
-                        };
-                        photos.push(photo);
-                        savePhotos(photos);
-                        renderPhotos();
+            let processed = 0;
+            fileArray.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // 每次读取完成后重新获取最新照片列表，防止并发上传丢失
+                    const photos = getPhotos();
+                    const photo = {
+                        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 6),
+                        url: e.target.result,
+                        date: currentDate,
+                        name: file.name
                     };
-                    reader.readAsDataURL(file);
-                }
-            }
+                    photos.push(photo);
+                    savePhotos(photos);
+                    renderPhotos();
+                    processed++;
+                    if (processed === fileArray.length) {
+                        showSuccessMessage(`已保存 ${fileArray.length} 张照片！`);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
         // 保存照片按钮

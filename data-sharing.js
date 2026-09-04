@@ -97,9 +97,14 @@
     function mergeLocalAndCloud(localArr, cloudArr) {
         if (!Array.isArray(localArr)) localArr = [];
         if (!Array.isArray(cloudArr)) cloudArr = [];
-        var cloudIds = {};
-        cloudArr.forEach(function (d) { if (d && d.id) cloudIds[d.id] = true; });
-        var localOnly = localArr.filter(function (d) { return d && d.id && !cloudIds[d.id]; });
+        // 用 id 作为首选去重标识；没有 id 的条目（如旧版照片）用 url 兜底
+        function getItemKey(d) {
+            if (!d) return '';
+            return d.id || d.url || JSON.stringify(d);
+        }
+        var cloudKeys = {};
+        cloudArr.forEach(function (d) { var k = getItemKey(d); if (k) cloudKeys[k] = true; });
+        var localOnly = localArr.filter(function (d) { var k = getItemKey(d); return k && !cloudKeys[k]; });
         return cloudArr.concat(localOnly);
     }
 
