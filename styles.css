@@ -661,6 +661,159 @@ body {
     justify-content: flex-end;
 }
 
+/* ============ 编辑日记四区域布局 ============ */
+.form-top-row {
+    display: flex;
+    gap: 15px;
+    padding-bottom: 18px;
+    border-bottom: 2px dashed #ffcdd2;
+    margin-bottom: 18px;
+}
+
+.form-top-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.form-middle-row {
+    display: flex;
+    gap: 18px;
+    padding-bottom: 18px;
+    border-bottom: 2px dashed #ffcdd2;
+    margin-bottom: 18px;
+}
+
+.diary-side {
+    flex: 1;
+    padding: 15px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.girl-side {
+    border: 2px dashed #ffb6c1;
+    background: linear-gradient(135deg, rgba(255, 182, 193, 0.08), rgba(255, 255, 255, 0.6));
+}
+
+.boy-side {
+    border: 2px dashed #87ceeb;
+    background: linear-gradient(135deg, rgba(135, 206, 235, 0.08), rgba(255, 255, 255, 0.6));
+}
+
+.side-title {
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.girl-side-title {
+    color: #e91e63;
+}
+
+.boy-side-title {
+    color: #1976d2;
+}
+
+.diary-side .form-group {
+    margin-bottom: 15px;
+}
+
+.diary-side .mood-options {
+    grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+    gap: 6px;
+}
+
+.diary-side .mood-btn {
+    padding: 8px 4px;
+    font-size: 1.2rem;
+    flex-direction: row;
+    justify-content: center;
+    min-height: 40px;
+}
+
+.diary-side .mood-preview {
+    margin-top: 12px;
+    padding: 12px;
+}
+
+.diary-side .preview-emoji {
+    font-size: 3rem;
+    margin-bottom: 8px;
+}
+
+.diary-side .preview-text {
+    font-size: 1rem;
+}
+
+.form-bottom-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.form-bottom-row .btn {
+    flex: 0 1 auto;
+    min-width: 160px;
+}
+
+/* ============ 日记展示四层布局 ============ */
+.diary-layer {
+    padding: 12px 0;
+    border-bottom: 1px dashed rgba(255, 105, 180, 0.15);
+}
+
+.diary-layer:last-of-type {
+    border-bottom: none;
+}
+
+.girl-layer {
+    padding-left: 12px;
+    border-left: 3px solid #ffb6c1;
+}
+
+.boy-layer {
+    padding-left: 12px;
+    border-left: 3px solid #87ceeb;
+}
+
+.girl-text {
+    color: #e91e63 !important;
+    margin-bottom: 8px !important;
+}
+
+.boy-text {
+    color: #1976d2 !important;
+    margin-bottom: 8px !important;
+}
+
+.diary-mood-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.girl-mood {
+    background: rgba(255, 182, 193, 0.25);
+    color: #c2185b;
+}
+
+.boy-mood {
+    background: rgba(135, 206, 235, 0.25);
+    color: #1565c0;
+}
+
+/* 日记条目内第四层按钮保持右侧并排 */
+.diary-item .diary-actions {
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255, 105, 180, 0.15);
+    margin-top: 4px;
+}
+
 .action-btn {
     padding: 8px 15px;
     border: none;
@@ -1143,6 +1296,25 @@ body {
 
     .form-actions {
         flex-direction: column;
+    }
+
+    /* 编辑日记四区域：移动端上下堆叠 */
+    .form-top-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .form-middle-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .form-bottom-row {
+        flex-direction: column;
+    }
+
+    .form-bottom-row .btn {
+        width: 100%;
     }
 
     .list-header {

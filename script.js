@@ -31,10 +31,26 @@ if (document.getElementById('daysCounter')) {
 
 // ============ 日记功能 ============
 
-// 从localStorage获取日记
+// 从localStorage获取日记（兼容旧数据：旧版单content/mood自动迁移为女生份）
 function getDiaries() {
     const diaries = localStorage.getItem('loveDiaries');
-    return diaries ? JSON.parse(diaries) : [];
+    if (!diaries) return [];
+    const arr = JSON.parse(diaries);
+    // 旧数据迁移：只有 content 没有 girlContent 的，归到女生份
+    arr.forEach(d => {
+        if (d.content !== undefined && d.girlContent === undefined) {
+            d.girlContent = d.content;
+            d.girlMood = d.mood || '';
+            d.girlEmoji = d.emoji || '';
+            d.boyContent = '';
+            d.boyMood = '';
+            d.boyEmoji = '';
+            delete d.content;
+            delete d.mood;
+            delete d.emoji;
+        }
+    });
+    return arr;
 }
 
 // 保存日记到localStorage（同时推送到云端，与对方共享）
@@ -97,12 +113,42 @@ function renderDiaries() {
     sortedDiaries.forEach(diary => {
         const diaryItem = document.createElement('div');
         diaryItem.className = 'diary-item';
+
+        // 女生心情展示
+        const girlMoodHtml = (diary.girlMood && diary.girlEmoji)
+            ? `<span class="diary-mood-tag girl-mood">今日心情：${diary.girlEmoji} ${escapeHtml(diary.girlMood)}</span>`
+            : '';
+        // 男生心情展示
+        const boyMoodHtml = (diary.boyMood && diary.boyEmoji)
+            ? `<span class="diary-mood-tag boy-mood">今日心情：${diary.boyEmoji} ${escapeHtml(diary.boyMood)}</span>`
+            : '';
+
+        // 女生内容（有内容才显示该层）
+        const girlLayer = diary.girlContent
+            ? `<div class="diary-layer girl-layer">
+                   <p class="diary-content-text girl-text">${escapeHtml(diary.girlContent)}</p>
+                   ${girlMoodHtml}
+               </div>`
+            : '';
+        // 男生内容（有内容才显示该层）
+        const boyLayer = diary.boyContent
+            ? `<div class="diary-layer boy-layer">
+                   <p class="diary-content-text boy-text">${escapeHtml(diary.boyContent)}</p>
+                   ${boyMoodHtml}
+               </div>`
+            : '';
+
         diaryItem.innerHTML = `
+            <!-- 第一层：标题 + 创建时间 -->
             <div class="diary-item-header">
                 <h3 class="diary-title">${escapeHtml(diary.title)}</h3>
                 <span class="diary-date">${formatDate(diary.date)}</span>
             </div>
-            <div class="diary-content-text">${escapeHtml(diary.content)}</div>
+            <!-- 第二层：女生日记（粉色） -->
+            ${girlLayer}
+            <!-- 第三层：男生日记（蓝色） -->
+            ${boyLayer}
+            <!-- 第四层：编辑与删除按钮（右侧并排） -->
             <div class="diary-actions">
                 <button class="action-btn edit-btn" onclick="editDiary('${diary.id}')">✏️ 编辑</button>
                 <button class="action-btn delete-btn" onclick="showDeleteModal('${diary.id}')">🗑️ 删除</button>
@@ -126,12 +172,35 @@ function saveDiary(e) {
     const id = document.getElementById('diaryId').value;
     const date = document.getElementById('diaryDate').value;
     const title = document.getElementById('diaryTitle').value.trim();
-    const content = document.getElementById('diaryContent').value.trim();
+    const girlContent = document.getElementById('girlContent').value.trim();
+    const boyContent = document.getElementById('boyContent').value.trim();
 
-    if (!date || !title || !content) {
-        alert('请填写完整的日记信息！');
+    if (!date || !title) {
+        alert('请填写日期和标题！');
         return;
     }
+    if (!girlContent && !boyContent) {
+        alert('请至少填写女生日记或男生日记的内容！');
+        return;
+    }
+
+    // 读取双方心情
+    const girlMoodInput = document.querySelector('.diary-mood[data-side="girl"]');
+    const girlEmojiInput = document.querySelector('.diary-emoji[data-side="girl"]');
+    const boyMoodInput = document.querySelector('.diary-mood[data-side="boy"]');
+    const boyEmojiInput = document.querySelector('.diary-emoji[data-side="boy"]');
+
+    const diaryData = {
+        id: id || generateId(),
+        date,
+        title,
+        girlContent,
+        girlMood: girlMoodInput ? girlMoodInput.value : '',
+        girlEmoji: girlEmojiInput ? girlEmojiInput.value : '',
+        boyContent,
+        boyMood: boyMoodInput ? boyMoodInput.value : '',
+        boyEmoji: boyEmojiInput ? boyEmojiInput.value : ''
+    };
 
     const diaries = getDiaries();
 
@@ -139,17 +208,11 @@ function saveDiary(e) {
         // 更新现有日记
         const index = diaries.findIndex(d => d.id === id);
         if (index !== -1) {
-            diaries[index] = { id, date, title, content };
+            diaries[index] = diaryData;
         }
     } else {
         // 添加新日记
-        const newDiary = {
-            id: generateId(),
-            date,
-            title,
-            content
-        };
-        diaries.push(newDiary);
+        diaries.push(diaryData);
     }
 
     saveDiaries(diaries);
@@ -171,7 +234,12 @@ function editDiary(id) {
     document.getElementById('diaryId').value = diary.id;
     document.getElementById('diaryDate').value = diary.date;
     document.getElementById('diaryTitle').value = diary.title;
-    document.getElementById('diaryContent').value = diary.content;
+    document.getElementById('girlContent').value = diary.girlContent || '';
+    document.getElementById('boyContent').value = diary.boyContent || '';
+
+    // 填充双方心情（更新心情展示区和选中状态）
+    setSideMood('girl', diary.girlMood || '', diary.girlEmoji || '');
+    setSideMood('boy', diary.boyMood || '', diary.boyEmoji || '');
 
     // 更新表单标题和按钮
     document.getElementById('formTitle').textContent = '✏️ 编辑日记';
@@ -183,6 +251,28 @@ function editDiary(id) {
         behavior: 'smooth',
         block: 'start'
     });
+}
+
+// 设置某一方的心情（编辑时回填用）
+function setSideMood(side, mood, emoji) {
+    const moodInput = document.querySelector('.diary-mood[data-side="' + side + '"]');
+    const emojiInput = document.querySelector('.diary-emoji[data-side="' + side + '"]');
+    const preview = document.querySelector('.mood-preview[data-side="' + side + '"]');
+    if (moodInput) moodInput.value = mood;
+    if (emojiInput) emojiInput.value = emoji;
+    if (preview) {
+        const pe = preview.querySelector('.preview-emoji');
+        const pt = preview.querySelector('.preview-text');
+        if (pe) pe.textContent = emoji || '😊';
+        if (pt) pt.textContent = mood || '暖心';
+    }
+    // 更新按钮选中状态
+    const selector = document.querySelector('.mood-selector[data-side="' + side + '"]');
+    if (selector) {
+        selector.querySelectorAll('.mood-btn').forEach(btn => {
+            btn.classList.toggle('selected', btn.dataset.mood === mood);
+        });
+    }
 }
 
 // 显示删除确认模态框
@@ -225,6 +315,10 @@ function resetForm() {
     document.getElementById('formTitle').textContent = '✨ 写一篇新的恋爱日记';
     document.getElementById('submitBtn').textContent = '💕 保存日记';
     document.getElementById('cancelBtn').style.display = 'none';
+
+    // 重置双方心情
+    setSideMood('girl', '', '');
+    setSideMood('boy', '', '');
 
     // 设置默认日期为今天
     const today = new Date().toISOString().split('T')[0];
@@ -287,41 +381,42 @@ function showSuccessMessage(message) {
     }, 3000);
 }
 
-// 表情包选择功能
+// 心情选择功能（支持女生/男生两套独立选择器）
 function initMoodSelector() {
-    const moodButtons = document.querySelectorAll('.mood-btn');
-    const moodPreview = document.getElementById('moodPreview');
-    const previewEmoji = document.getElementById('previewEmoji');
-    const previewText = document.getElementById('previewText');
-    const diaryMood = document.getElementById('diaryMood');
-    const diaryEmoji = document.getElementById('diaryEmoji');
+    document.querySelectorAll('.mood-selector').forEach(selector => {
+        const side = selector.dataset.side;
+        const moodButtons = selector.querySelectorAll('.mood-btn');
+        const preview = document.querySelector('.mood-preview[data-side="' + side + '"]');
+        const moodInput = document.querySelector('.diary-mood[data-side="' + side + '"]');
+        const emojiInput = document.querySelector('.diary-emoji[data-side="' + side + '"]');
 
-    moodButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            // 移除所有按钮的选中状态
-            moodButtons.forEach(btn => btn.classList.remove('selected'));
+        moodButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // 只移除当前选择器内按钮的选中状态
+                moodButtons.forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
 
-            // 添加选中状态
-            button.classList.add('selected');
+                const mood = button.dataset.mood;
+                const emoji = button.dataset.emoji;
 
-            // 更新预览
-            const mood = button.dataset.mood;
-            const emoji = button.dataset.emoji;
+                // 更新心情展示
+                if (preview) {
+                    const pe = preview.querySelector('.preview-emoji');
+                    const pt = preview.querySelector('.preview-text');
+                    if (pe) {
+                        pe.style.animation = 'none';
+                        setTimeout(() => { pe.textContent = emoji; pe.style.animation = 'pulse 0.5s ease'; }, 50);
+                    }
+                    if (pt) {
+                        pt.style.animation = 'none';
+                        setTimeout(() => { pt.textContent = mood; pt.style.animation = 'slideIn 0.3s ease'; }, 50);
+                    }
+                }
 
-            // 添加动画效果
-            previewEmoji.style.animation = 'none';
-            previewText.style.animation = 'none';
-
-            setTimeout(() => {
-                previewEmoji.textContent = emoji;
-                previewText.textContent = mood;
-                previewEmoji.style.animation = 'pulse 0.5s ease';
-                previewText.style.animation = 'slideIn 0.3s ease';
-            }, 50);
-
-            // 更新隐藏字段
-            diaryMood.value = mood;
-            diaryEmoji.value = emoji;
+                // 更新隐藏字段
+                if (moodInput) moodInput.value = mood;
+                if (emojiInput) emojiInput.value = emoji;
+            });
         });
     });
 }
@@ -471,19 +566,34 @@ function addSampleData() {
                 id: generateId(),
                 date: '2021-05-02',
                 title: '我们在一起了！',
-                content: '今天是我们正式确定关系的第一天，真的很开心！从今天开始，我要好好珍惜这段感情，和你一起走过每一个春夏秋冬。'
+                girlContent: '今天是我们正式确定关系的第一天，真的很开心！从今天开始，我要好好珍惜这段感情，和你一起走过每一个春夏秋冬。',
+                girlMood: '幸福',
+                girlEmoji: '💕',
+                boyContent: '',
+                boyMood: '',
+                boyEmoji: ''
             },
             {
                 id: generateId(),
                 date: '2021-06-01',
                 title: '儿童节的惊喜',
-                content: '今天你给我准备了儿童节惊喜，虽然我们都已经不是小孩子了，但在你面前，我永远可以像个孩子一样。谢谢你让我感受到这份纯真的快乐。'
+                girlContent: '今天你给我准备了儿童节惊喜，虽然我们都已经不是小孩子了，但在你面前，我永远可以像个孩子一样。谢谢你让我感受到这份纯真的快乐。',
+                girlMood: '愉悦',
+                girlEmoji: '🥰',
+                boyContent: '',
+                boyMood: '',
+                boyEmoji: ''
             },
             {
                 id: generateId(),
                 date: '2021-08-15',
                 title: '第一次一起看电影',
-                content: '今天我们一起去看了电影，你在我身边的感觉真好。电影的内容我已经记不太清楚了，但是和你在一起的每一个瞬间都深深印在了我的心里。'
+                girlContent: '今天我们一起去看了电影，你在我身边的感觉真好。电影的内容我已经记不太清楚了，但是和你在一起的每一个瞬间都深深印在了我的心里。',
+                girlMood: '暖心',
+                girlEmoji: '😊',
+                boyContent: '',
+                boyMood: '',
+                boyEmoji: ''
             }
         ];
 

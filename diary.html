@@ -32,71 +32,121 @@
                 <form id="diaryForm" class="diary-form">
                     <input type="hidden" id="diaryId" value="">
 
-                    <div class="form-group">
-                        <label for="diaryDate" class="form-label">📅 日期</label>
-                        <input type="date" id="diaryDate" class="form-input" required>
+                    <!-- 上侧：日期与标题 -->
+                    <div class="form-top-row">
+                        <div class="form-group">
+                            <label for="diaryDate" class="form-label">📅 日期</label>
+                            <input type="date" id="diaryDate" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="diaryTitle" class="form-label">💝 标题</label>
+                            <input type="text" id="diaryTitle" class="form-input" placeholder="给这篇日记起个甜蜜的标题..." required>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="diaryTitle" class="form-label">💝 标题</label>
-                        <input type="text" id="diaryTitle" class="form-input" placeholder="给这篇日记起个甜蜜的标题..." required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="diaryContent" class="form-label">📝 内容</label>
-                        <textarea id="diaryContent" class="form-textarea" placeholder="记录今天发生的美好事情..." rows="6" required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">💗 选择心情</label>
-                        <div class="mood-selector" id="moodSelector">
-                            <!-- 正面心情 -->
-                            <div class="mood-category">
-                                <p class="mood-category-title">😊 美好心情</p>
-                                <div class="mood-options positive-moods">
-                                    <button type="button" class="mood-btn" data-mood="暖心" data-emoji="😊">😊 暖心</button>
-                                    <button type="button" class="mood-btn" data-mood="幸福" data-emoji="💕">💕 幸福</button>
-                                    <button type="button" class="mood-btn" data-mood="惬意" data-emoji="😌">😌 惬意</button>
-                                    <button type="button" class="mood-btn" data-mood="满足" data-emoji="😄">😄 满足</button>
-                                    <button type="button" class="mood-btn" data-mood="愉悦" data-emoji="🥰">🥰 愉悦</button>
-                                    <button type="button" class="mood-btn" data-mood="惊喜" data-emoji="😲">😲 惊喜</button>
-                                    <button type="button" class="mood-btn" data-mood="温存" data-emoji="💗">💗 温存</button>
-                                    <button type="button" class="mood-btn" data-mood="眷恋" data-emoji="🥺">🥺 眷恋</button>
-                                    <button type="button" class="mood-btn" data-mood="恬淡" data-emoji="🍃">🍃 恬淡</button>
-                                    <button type="button" class="mood-btn" data-mood="静好" data-emoji="🌸">🌸 静好</button>
-                                </div>
+                    <!-- 中间：左侧女生日记 + 右侧男生日记 -->
+                    <div class="form-middle-row">
+                        <!-- 左侧：女生日记 -->
+                        <div class="diary-side girl-side">
+                            <h3 class="side-title girl-side-title">👩 女生日记</h3>
+                            <div class="form-group">
+                                <label for="girlContent" class="form-label">📝 内容</label>
+                                <textarea id="girlContent" class="form-textarea" placeholder="记录今天发生的美好事情..." rows="5"></textarea>
                             </div>
-
-                            <!-- 负面心情 -->
-                            <div class="mood-category">
-                                <p class="mood-category-title">😔 难过心情</p>
-                                <div class="mood-options negative-moods">
-                                    <button type="button" class="mood-btn" data-mood="沉重" data-emoji="😔">😔 沉重</button>
-                                    <button type="button" class="mood-btn" data-mood="烦躁" data-emoji="😤">😤 烦躁</button>
-                                    <button type="button" class="mood-btn" data-mood="悲伤" data-emoji="😢">😢 悲伤</button>
-                                    <button type="button" class="mood-btn" data-mood="忐忑" data-emoji="😰">😰 忐忑</button>
-                                    <button type="button" class="mood-btn" data-mood="酸涩" data-emoji="🥀">🥀 酸涩</button>
-                                    <button type="button" class="mood-btn" data-mood="落寞" data-emoji="🌧️">🌧️ 落寞</button>
-                                    <button type="button" class="mood-btn" data-mood="猜疑" data-emoji="🤔">🤔 猜疑</button>
-                                    <button type="button" class="mood-btn" data-mood="委屈" data-emoji="😞">😞 委屈</button>
-                                    <button type="button" class="mood-btn" data-mood="倦怠" data-emoji="😩">😩 倦怠</button>
-                                    <button type="button" class="mood-btn" data-mood="疏离" data-emoji="💔">💔 疏离</button>
+                            <div class="form-group">
+                                <label class="form-label">💗 选择心情</label>
+                                <div class="mood-selector" data-side="girl">
+                                    <div class="mood-category">
+                                        <div class="mood-options positive-moods">
+                                            <button type="button" class="mood-btn" data-mood="暖心" data-emoji="😊">😊</button>
+                                            <button type="button" class="mood-btn" data-mood="幸福" data-emoji="💕">💕</button>
+                                            <button type="button" class="mood-btn" data-mood="惬意" data-emoji="😌">😌</button>
+                                            <button type="button" class="mood-btn" data-mood="满足" data-emoji="😄">😄</button>
+                                            <button type="button" class="mood-btn" data-mood="愉悦" data-emoji="🥰">🥰</button>
+                                            <button type="button" class="mood-btn" data-mood="惊喜" data-emoji="😲">😲</button>
+                                            <button type="button" class="mood-btn" data-mood="温存" data-emoji="💗">💗</button>
+                                            <button type="button" class="mood-btn" data-mood="眷恋" data-emoji="🥺">🥺</button>
+                                            <button type="button" class="mood-btn" data-mood="恬淡" data-emoji="🍃">🍃</button>
+                                            <button type="button" class="mood-btn" data-mood="静好" data-emoji="🌸">🌸</button>
+                                        </div>
+                                    </div>
+                                    <div class="mood-category">
+                                        <div class="mood-options negative-moods">
+                                            <button type="button" class="mood-btn" data-mood="沉重" data-emoji="😔">😔</button>
+                                            <button type="button" class="mood-btn" data-mood="烦躁" data-emoji="😤">😤</button>
+                                            <button type="button" class="mood-btn" data-mood="悲伤" data-emoji="😢">😢</button>
+                                            <button type="button" class="mood-btn" data-mood="忐忑" data-emoji="😰">😰</button>
+                                            <button type="button" class="mood-btn" data-mood="酸涩" data-emoji="🥀">🥀</button>
+                                            <button type="button" class="mood-btn" data-mood="落寞" data-emoji="🌧️">🌧️</button>
+                                            <button type="button" class="mood-btn" data-mood="猜疑" data-emoji="🤔">🤔</button>
+                                            <button type="button" class="mood-btn" data-mood="委屈" data-emoji="😞">😞</button>
+                                            <button type="button" class="mood-btn" data-mood="倦怠" data-emoji="😩">😩</button>
+                                            <button type="button" class="mood-btn" data-mood="疏离" data-emoji="💔">💔</button>
+                                        </div>
+                                    </div>
                                 </div>
+                                <div class="mood-preview" data-side="girl">
+                                    <p class="preview-title">💖 心情展示</p>
+                                    <div class="preview-emoji">😊</div>
+                                    <p class="preview-text">暖心</p>
+                                </div>
+                                <input type="hidden" class="diary-mood" data-side="girl" value="">
+                                <input type="hidden" class="diary-emoji" data-side="girl" value="">
                             </div>
                         </div>
 
-                        <!-- 表情包预览区域 -->
-                        <div class="mood-preview" id="moodPreview">
-                            <p class="preview-title">📸 表情包预览</p>
-                            <div class="preview-emoji" id="previewEmoji">😊</div>
-                            <p class="preview-text" id="previewText">暖心</p>
+                        <!-- 右侧：男生日记 -->
+                        <div class="diary-side boy-side">
+                            <h3 class="side-title boy-side-title">👨 男生日记</h3>
+                            <div class="form-group">
+                                <label for="boyContent" class="form-label">📝 内容</label>
+                                <textarea id="boyContent" class="form-textarea" placeholder="记录今天发生的美好事情..." rows="5"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">💙 选择心情</label>
+                                <div class="mood-selector" data-side="boy">
+                                    <div class="mood-category">
+                                        <div class="mood-options positive-moods">
+                                            <button type="button" class="mood-btn" data-mood="暖心" data-emoji="😊">😊</button>
+                                            <button type="button" class="mood-btn" data-mood="幸福" data-emoji="💕">💕</button>
+                                            <button type="button" class="mood-btn" data-mood="惬意" data-emoji="😌">😌</button>
+                                            <button type="button" class="mood-btn" data-mood="满足" data-emoji="😄">😄</button>
+                                            <button type="button" class="mood-btn" data-mood="愉悦" data-emoji="🥰">🥰</button>
+                                            <button type="button" class="mood-btn" data-mood="惊喜" data-emoji="😲">😲</button>
+                                            <button type="button" class="mood-btn" data-mood="温存" data-emoji="💗">💗</button>
+                                            <button type="button" class="mood-btn" data-mood="眷恋" data-emoji="🥺">🥺</button>
+                                            <button type="button" class="mood-btn" data-mood="恬淡" data-emoji="🍃">🍃</button>
+                                            <button type="button" class="mood-btn" data-mood="静好" data-emoji="🌸">🌸</button>
+                                        </div>
+                                    </div>
+                                    <div class="mood-category">
+                                        <div class="mood-options negative-moods">
+                                            <button type="button" class="mood-btn" data-mood="沉重" data-emoji="😔">😔</button>
+                                            <button type="button" class="mood-btn" data-mood="烦躁" data-emoji="😤">😤</button>
+                                            <button type="button" class="mood-btn" data-mood="悲伤" data-emoji="😢">😢</button>
+                                            <button type="button" class="mood-btn" data-mood="忐忑" data-emoji="😰">😰</button>
+                                            <button type="button" class="mood-btn" data-mood="酸涩" data-emoji="🥀">🥀</button>
+                                            <button type="button" class="mood-btn" data-mood="落寞" data-emoji="🌧️">🌧️</button>
+                                            <button type="button" class="mood-btn" data-mood="猜疑" data-emoji="🤔">🤔</button>
+                                            <button type="button" class="mood-btn" data-mood="委屈" data-emoji="😞">😞</button>
+                                            <button type="button" class="mood-btn" data-mood="倦怠" data-emoji="😩">😩</button>
+                                            <button type="button" class="mood-btn" data-mood="疏离" data-emoji="💔">💔</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mood-preview" data-side="boy">
+                                    <p class="preview-title">💙 心情展示</p>
+                                    <div class="preview-emoji">😊</div>
+                                    <p class="preview-text">暖心</p>
+                                </div>
+                                <input type="hidden" class="diary-mood" data-side="boy" value="">
+                                <input type="hidden" class="diary-emoji" data-side="boy" value="">
+                            </div>
                         </div>
-
-                        <input type="hidden" id="diaryMood" value="">
-                        <input type="hidden" id="diaryEmoji" value="">
                     </div>
 
-                    <div class="form-actions">
+                    <!-- 下侧：按钮 -->
+                    <div class="form-bottom-row">
                         <button type="submit" class="btn btn-primary" id="submitBtn">💕 保存日记</button>
                         <button type="button" class="btn btn-secondary" id="cancelBtn" style="display: none;">取消编辑</button>
                     </div>
