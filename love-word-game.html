@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>猜词游戏 - 祖家琦 ❤️ 王意颖</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #c2185b;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #ff69b4;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #ff1493;
+            transform: scale(1.05);
+        }
+
+        .game-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(194, 24, 91, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .category {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .word-display {
+            font-size: 2.5rem;
+            text-align: center;
+            letter-spacing: 10px;
+            margin: 30px 0;
+            color: #c2185b;
+            font-weight: bold;
+        }
+
+        .hint {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .input-area {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .word-input {
+            padding: 10px 15px;
+            font-size: 1.2rem;
+            border: 2px solid #ff69b4;
+            border-radius: 10px;
+            width: 200px;
+            text-align: center;
+        }
+
+        .submit-btn {
+            padding: 10px 20px;
+            background: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #ff1493;
+            transform: scale(1.05);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #c2185b;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .message {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.1rem;
+            min-height: 30px;
+        }
+
+        .correct {
+            color: #4caf50;
+        }
+
+        .wrong {
+            color: #f44336;
+        }
+
+        .used-letters {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .letters {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .letter {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .letter.wrong {
+            background: #ffebee;
+            color: #f44336;
+        }
+
+        .letter.correct {
+            background: #e8f5e9;
+            color: #4caf50;
+        }
+
+        .love-icon {
+            color: #c2185b;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .game-over {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .custom-word-area {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            color: #c2185b;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .new-game-btn {
+            padding: 10px 30px;
+            background: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .new-game-btn:hover {
+            background: #ff1493;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <a href="games.html" class="back-button">返回游戏目录</a>
+        <a href="index.html" class="back-button" style="background: #999;">返回首页</a>
+    </div>
+
+    <div class="header">
+        <h1>猜词游戏 <span class="love-icon">💕</span></h1>
+        <p>猜出与爱情相关的词汇！</p>
+    </div>
+
+    <div class="game-container">
+        <div class="category" id="category">类别：爱情词汇</div>
+        <div class="word-display" id="wordDisplay"></div>
+        <div class="hint" id="hint"></div>
+
+        <div class="input-area">
+            <input type="text" class="word-input" id="guessInput" placeholder="输入你的答案" maxlength="10">
+            <button class="submit-btn" id="submitBtn">提交</button>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">得分</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="remaining">6</div>
+                <div class="stat-label">剩余机会</div>
+            </div>
+        </div>
+
+        <div class="custom-word-area" id="customWordArea" style="display: none;">
+            <div class="section-title">自定义猜词</div>
+            <div style="display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="customWordInput" placeholder="输入词汇" class="word-input" maxlength="10">
+                <input type="text" id="customHintInput" placeholder="输入提示" class="word-input" maxlength="30">
+                <button class="submit-btn" onclick="setCustomWord()">设置词汇</button>
+            </div>
+            <button class="submit-btn" onclick="toggleCustomMode()" style="margin-top: 10px;">
+                <span id="customModeText">开启自定义模式</span>
+            </button>
+        </div>
+
+        <div class="used-letters">
+            <p>已使用字母：</p>
+            <div class="letters" id="usedLetters"></div>
+        </div>
+
+        <div class="game-over" id="gameOver">
+            <h2 id="gameOverTitle"></h2>
+            <p id="gameOverMessage"></p>
+            <button class="new-game-btn" onclick="initGame()">开始新游戏</button>
+        </div>
+    </div>
+
+    <script>
+        // 词汇库
+        const words = [
+            { word: '爱情', hint: '两个人之间的深厚感情' },
+            { word: '恋人', hint: '正在恋爱中的男女' },
+            { word: '甜蜜', hint: '爱情带来的美好感受' },
+            { word: '约会', hint: '男女约会见面的活动' },
+            { word: '心动', hint: '初次产生好感的感觉' },
+            { word: '拥抱', hint: '表达爱意的亲密动作' },
+            { word: '告白', hint: '向对方表达爱意' },
+            { word: '浪漫', hint: '充满爱意的美好氛围' },
+            { word: '思念', hint: '对远方恋人的想念' },
+            { word: '承诺', hint: '对爱情的长久保证' },
+            { word: '牵手', hint: '恋人间的亲密接触' },
+            { word: '求婚', hint: '请求对方结婚' },
+            { word: '婚礼', hint: '结婚典礼' },
+            { word: '礼物', hint: '表达心意的物品' },
+            { word: '情人节', hint: '西方的恋爱节日' },
+            { word: '纪念日', hint: '值得纪念的特殊日子' },
+            { word: '拥抱', hint: '温暖的亲密接触' },
+            { word: '亲吻', hint: '表达爱意的亲吻' },
+            { word: '初恋', hint: '第一次的恋爱' },
+            { word: '热恋', hint: '非常投入的恋爱状态' }
+        ];
+
+        let currentWord = '';
+        let currentHint = '';
+        let guessedLetters = [];
+        let remainingAttempts = 6;
+        let score = 0;
+        let gameOver = false;
+        let isCustomMode = false;
+
+        const wordDisplay = document.getElementById('wordDisplay');
+        const hint = document.getElementById('hint');
+        const guessInput = document.getElementById('guessInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const message = document.getElementById('message');
+        const scoreElement = document.getElementById('score');
+        const remainingElement = document.getElementById('remaining');
+        const usedLettersElement = document.getElementById('usedLetters');
+        const gameOverDiv = document.getElementById('gameOver');
+        const gameOverTitle = document.getElementById('gameOverTitle');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+
+        // 初始化游戏
+        function initGame() {
+            if (!isCustomMode) {
+                const randomIndex = Math.floor(Math.random() * words.length);
+                currentWord = words[randomIndex].word;
+                currentHint = words[randomIndex].hint;
+            }
+
+            guessedLetters = [];
+            remainingAttempts = 6;
+            gameOver = false;
+
+            wordDisplay.textContent = '_ '.repeat(currentWord.length);
+            hint.textContent = `提示：${currentHint}`;
+            guessInput.value = '';
+            guessInput.disabled = false;
+            submitBtn.disabled = false;
+            message.textContent = '';
+            message.className = 'message';
+            scoreElement.textContent = score;
+            remainingElement.textContent = remainingAttempts;
+            usedLettersElement.innerHTML = '';
+            gameOverDiv.style.display = 'none';
+
+            // 添加输入事件监听
+            guessInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkGuess();
+                }
+            });
+        }
+
+        // 检查猜测
+        function checkGuess() {
+            if (gameOver) return;
+
+            const guess = guessInput.value.trim();
+
+            if (guess.length === 0) {
+                message.textContent = '请输入答案！';
+                message.className = 'message wrong';
+                return;
+            }
+
+            if (guess === currentWord) {
+                // 猜对了
+                score += remainingAttempts * 10;
+                scoreElement.textContent = score;
+                wordDisplay.textContent = currentWord.split('').join(' ');
+                message.textContent = '🎉 恭喜你，猜对了！';
+                message.className = 'message correct';
+                endGame(true);
+            } else {
+                // 猜错了
+                message.textContent = '❌ 答案不对，再试试！';
+                message.className = 'message wrong';
+                guessInput.value = '';
+
+                // 检查是否使用了新的字母
+                if (!guessedLetters.includes(guess)) {
+                    guessedLetters.push(guess);
+                    updateUsedLetters();
+                    remainingAttempts--;
+                    remainingElement.textContent = remainingAttempts;
+
+                    if (remainingAttempts === 0) {
+                        // 游戏结束
+                        wordDisplay.textContent = currentWord.split('').join(' ');
+                        message.textContent = '😢 游戏结束！';
+                        message.className = 'message wrong';
+                        endGame(false);
+                    }
+                }
+            }
+        }
+
+        // 更新已使用字母显示
+        function updateUsedLetters() {
+            usedLettersElement.innerHTML = '';
+            guessedLetters.forEach(letter => {
+                const letterDiv = document.createElement('div');
+                letterDiv.className = 'letter wrong';
+                letterDiv.textContent = letter;
+                usedLettersElement.appendChild(letterDiv);
+            });
+        }
+
+        // 切换自定义模式
+        function toggleCustomMode() {
+            const customArea = document.getElementById('customWordArea');
+            const customModeText = document.getElementById('customModeText');
+
+            if (customArea.style.display === 'none') {
+                customArea.style.display = 'block';
+                customModeText.textContent = '关闭自定义模式';
+            } else {
+                customArea.style.display = 'none';
+                customModeText.textContent = '开启自定义模式';
+                isCustomMode = false;
+            }
+        }
+
+        // 设置自定义词汇
+        function setCustomWord() {
+            const customWord = document.getElementById('customWordInput').value.trim();
+            const customHint = document.getElementById('customHintInput').value.trim();
+
+            if (!customWord || !customHint) {
+                message.textContent = '请输入词汇和提示！';
+                message.className = 'message wrong';
+                return;
+            }
+
+            currentWord = customWord;
+            currentHint = customHint;
+            isCustomMode = true;
+
+            document.getElementById('customWordInput').value = '';
+            document.getElementById('customHintInput').value = '';
+
+            message.textContent = '自定义词汇已设置！';
+            message.className = 'message correct';
+
+            setTimeout(() => {
+                message.textContent = '';
+            }, 2000);
+        }
+
+        // 结束游戏
+        function endGame(won) {
+            gameOver = true;
+            guessInput.disabled = true;
+            submitBtn.disabled = true;
+
+            setTimeout(() => {
+                gameOverDiv.style.display = 'block';
+                if (won) {
+                    gameOverTitle.textContent = '🎉 恭喜获胜！';
+                    gameOverMessage.textContent = `你成功猜出了"${currentWord}"！获得 ${remainingAttempts * 10} 分！`;
+                } else {
+                    gameOverTitle.textContent = '😢 游戏结束';
+                    gameOverMessage.textContent = `正确答案是"${currentWord}"，下次加油！`;
+                }
+
+                // 重新显示自定义模式选项
+                document.getElementById('customWordArea').style.display = 'block';
+            }, 1000);
+        }
+
+        // 提交按钮点击事件
+        submitBtn.addEventListener('click', checkGuess);
+
+        // 开始游戏
+        initGame();
+    </script>
+</body>
+</html>

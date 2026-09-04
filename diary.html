@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>恋爱日记 - 祖家琦 ❤️ 王意颖</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="heart-background">
+        <div class="floating-heart" style="left: 15%; animation-delay: 0.5s;">💕</div>
+        <div class="floating-heart" style="left: 35%; animation-delay: 1.5s;">💖</div>
+        <div class="floating-heart" style="left: 65%; animation-delay: 2s;">💗</div>
+        <div class="floating-heart" style="left: 85%; animation-delay: 3s;">❤️</div>
+    </div>
+
+    <div class="container">
+        <header class="diary-header">
+            <h1 class="diary-title">📖 恋爱日记</h1>
+            <p class="diary-subtitle">记录我们每一个珍贵的瞬间</p>
+            <div class="back-nav">
+                <a href="index.html" class="back-button">🏠 返回首页</a>
+            </div>
+        </header>
+
+        <div class="diary-content">
+            <!-- 添加/编辑日记表单 -->
+            <div class="diary-form-section">
+                <div class="form-header">
+                    <h2 id="formTitle">✨ 写一篇新的恋爱日记</h2>
+                </div>
+                <form id="diaryForm" class="diary-form">
+                    <input type="hidden" id="diaryId" value="">
+
+                    <div class="form-group">
+                        <label for="diaryDate" class="form-label">📅 日期</label>
+                        <input type="date" id="diaryDate" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="diaryTitle" class="form-label">💝 标题</label>
+                        <input type="text" id="diaryTitle" class="form-input" placeholder="给这篇日记起个甜蜜的标题..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="diaryContent" class="form-label">📝 内容</label>
+                        <textarea id="diaryContent" class="form-textarea" placeholder="记录今天发生的美好事情..." rows="6" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">💗 选择心情</label>
+                        <div class="mood-selector" id="moodSelector">
+                            <!-- 正面心情 -->
+                            <div class="mood-category">
+                                <p class="mood-category-title">😊 美好心情</p>
+                                <div class="mood-options positive-moods">
+                                    <button type="button" class="mood-btn" data-mood="暖心" data-emoji="😊">😊 暖心</button>
+                                    <button type="button" class="mood-btn" data-mood="幸福" data-emoji="💕">💕 幸福</button>
+                                    <button type="button" class="mood-btn" data-mood="惬意" data-emoji="😌">😌 惬意</button>
+                                    <button type="button" class="mood-btn" data-mood="满足" data-emoji="😄">😄 满足</button>
+                                    <button type="button" class="mood-btn" data-mood="愉悦" data-emoji="🥰">🥰 愉悦</button>
+                                    <button type="button" class="mood-btn" data-mood="惊喜" data-emoji="😲">😲 惊喜</button>
+                                    <button type="button" class="mood-btn" data-mood="温存" data-emoji="💗">💗 温存</button>
+                                    <button type="button" class="mood-btn" data-mood="眷恋" data-emoji="🥺">🥺 眷恋</button>
+                                    <button type="button" class="mood-btn" data-mood="恬淡" data-emoji="🍃">🍃 恬淡</button>
+                                    <button type="button" class="mood-btn" data-mood="静好" data-emoji="🌸">🌸 静好</button>
+                                </div>
+                            </div>
+
+                            <!-- 负面心情 -->
+                            <div class="mood-category">
+                                <p class="mood-category-title">😔 难过心情</p>
+                                <div class="mood-options negative-moods">
+                                    <button type="button" class="mood-btn" data-mood="沉重" data-emoji="😔">😔 沉重</button>
+                                    <button type="button" class="mood-btn" data-mood="烦躁" data-emoji="😤">😤 烦躁</button>
+                                    <button type="button" class="mood-btn" data-mood="悲伤" data-emoji="😢">😢 悲伤</button>
+                                    <button type="button" class="mood-btn" data-mood="忐忑" data-emoji="😰">😰 忐忑</button>
+                                    <button type="button" class="mood-btn" data-mood="酸涩" data-emoji="🥀">🥀 酸涩</button>
+                                    <button type="button" class="mood-btn" data-mood="落寞" data-emoji="🌧️">🌧️ 落寞</button>
+                                    <button type="button" class="mood-btn" data-mood="猜疑" data-emoji="🤔">🤔 猜疑</button>
+                                    <button type="button" class="mood-btn" data-mood="委屈" data-emoji="😞">😞 委屈</button>
+                                    <button type="button" class="mood-btn" data-mood="倦怠" data-emoji="😩">😩 倦怠</button>
+                                    <button type="button" class="mood-btn" data-mood="疏离" data-emoji="💔">💔 疏离</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 表情包预览区域 -->
+                        <div class="mood-preview" id="moodPreview">
+                            <p class="preview-title">📸 表情包预览</p>
+                            <div class="preview-emoji" id="previewEmoji">😊</div>
+                            <p class="preview-text" id="previewText">暖心</p>
+                        </div>
+
+                        <input type="hidden" id="diaryMood" value="">
+                        <input type="hidden" id="diaryEmoji" value="">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">💕 保存日记</button>
+                        <button type="button" class="btn btn-secondary" id="cancelBtn" style="display: none;">取消编辑</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 日记列表 -->
+            <div class="diary-list-section">
+                <div class="list-header">
+                    <h2>🌹 我们的甜蜜回忆</h2>
+                    <span class="diary-count" id="diaryCount">0 篇日记</span>
+                </div>
+
+                <div id="diaryList" class="diary-list">
+                    <!-- 日记条目将在这里动态生成 -->
+                </div>
+
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <div class="empty-icon">📔</div>
+                    <p class="empty-text">还没有写日记哦</p>
+                    <p class="empty-subtext">开始记录你们的第一个甜蜜时刻吧！</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认删除的模态框 -->
+    <div id="deleteModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💔 确认删除</h3>
+            </div>
+            <div class="modal-body">
+                <p>确定要删除这篇日记吗？删除后无法恢复。</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="confirmCancel">取消</button>
+                <button class="btn btn-danger" id="confirmDelete">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+<script src="mobile-optimizations.js"></script>
+    <script>
+        // 拖尾式光标跟随效果
+        const cursorTrail = [];
+        const maxTrailLength = 10;
+
+        document.addEventListener('mousemove', (e) => {
+            // 创建新的光标元素
+            const cursor = document.createElement('div');
+            cursor.className = 'cursor-trail';
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            cursor.style.opacity = '0.3'; // 透明度设置为0.3
+
+            // 添加爱心图标
+            cursor.innerHTML = '💕';
+
+            // 添加到轨迹数组
+            cursorTrail.push(cursor);
+            document.body.appendChild(cursor);
+
+            // 限制轨迹长度
+            if (cursorTrail.length > maxTrailLength) {
+                const oldCursor = cursorTrail.shift();
+                oldCursor.style.transition = 'opacity 0.5s';
+                oldCursor.style.opacity = '0';
+                setTimeout(() => {
+                    oldCursor.remove();
+                }, 500);
+            }
+
+            // 2秒后移除
+            setTimeout(() => {
+                cursor.style.transition = 'opacity 0.5s';
+                cursor.style.opacity = '0';
+                setTimeout(() => cursor.remove(), 500);
+            }, 2000);
+        });
+
+        // 点击特效
+        document.addEventListener('click', (e) => {
+            const clickEffect = document.createElement('div');
+            clickEffect.className = 'click-effect';
+            clickEffect.style.left = e.clientX + 'px';
+            clickEffect.style.top = e.clientY + 'px';
+
+            // 随机选择一个爱心表情
+            const hearts = ['❤️', '💕', '💖', '💗', '💘', '💝', '💟'];
+            const randomHeart = hearts[Math.floor(Math.random() * hearts.length)];
+            clickEffect.innerHTML = randomHeart;
+
+            document.body.appendChild(clickEffect);
+
+            // 动画效果
+            clickEffect.style.animation = 'clickPop 1s ease-out forwards';
+
+            // 移除元素
+            setTimeout(() => {
+                clickEffect.remove();
+            }, 1000);
+        });
+
+        // 添加动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes clickPop {
+                0% {
+                    transform: scale(0) rotate(0deg);
+                    opacity: 1;
+                }
+                50% {
+                    transform: scale(1.5) rotate(180deg);
+                    opacity: 0.8;
+                }
+                100% {
+                    transform: scale(0) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+
+            /* 拖尾式光标样式 */
+            .cursor-trail {
+                position: fixed;
+                pointer-events: none;
+                z-index: 9999;
+                font-size: 2rem;
+                transform: translate(-50%, -50%);
+                transition: all 0.1s ease;
+                opacity: 0.3;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
