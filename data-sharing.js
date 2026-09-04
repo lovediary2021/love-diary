@@ -40,7 +40,24 @@
         return btoa(unescape(encodeURIComponent(str)));
     }
 
+    // 读取文件内容（纯文本），带重试（最多3次）
+    async function getFileWithRetry(name, retries) {
+        retries = retries || 0;
+        try {
+            return await getFile(name);
+        } catch (e) {
+            if (retries < 3) {
+                console.warn('getFile 重试 ' + (retries + 1) + '/3:', e.message);
+                await new Promise(function (r) { setTimeout(r, 1500); });
+                return await getFileWithRetry(name, retries + 1);
+            }
+            throw e;
+        }
+    }
+
     // 读取文件内容（纯文本）
+    // 说明：GitHub Contents API 对超过 1MB 的文件不返回 content，
+    //       此时自动改用 Git Blob API 获取（支持最大 100MB 文件）。
     async function getFile(name) {
         var url = API + '/repos/' + CONFIG.owner + '/' + CONFIG.repo + '/contents/' + name;
         var res = await fetch(url, {
@@ -50,7 +67,52 @@
             }
         });
         if (!res.ok) throw new Error('GET ' + name + ' -> ' + res.status);
-        return await res.text();
+        var text = await res.text();
+        // 判断返回的是 raw 内容还是 JSON 元数据（大文件时返回 JSON 元数据）
+        if (text.charAt(0) === '{' && text.indexOf('"sha"') >= 0 && text.indexOf('"content"') >= 0) {
+            // 大文件：用 Git Blob API 获取内容
+            try {
+                var meta = JSON.parse(text);
+                if (meta.sha) {
+                    var blobRes = await fetch(API + '/repos/' + CONFIG.owner + '/' + CONFIG.repo + '/git/blobs/' + meta.sha, {
+                        headers: { 'Authorization': 'Bearer ' + getToken() }
+                    });
+                    if (blobRes.ok) {
+                        var blobData = await blobRes.json();
+                        if (blobData.content) {
+                            return atob(blobData.content);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Blob API 兜底失败，尝试 tree 方式:', e);
+            }
+            // 再兜底：通过 tree 获取 blob sha
+            try {
+                var treeRes = await fetch(API + '/repos/' + CONFIG.owner + '/' + CONFIG.repo + '/git/trees/main?recursive=1', {
+                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                });
+                if (treeRes.ok) {
+                    var treeData = await treeRes.json();
+                    var item = (treeData.tree || []).find(function (t) { return t.path === name; });
+                    if (item && item.sha) {
+                        var blobRes2 = await fetch(API + '/repos/' + CONFIG.owner + '/' + CONFIG.repo + '/git/blobs/' + item.sha, {
+                            headers: { 'Authorization': 'Bearer ' + getToken() }
+                        });
+                        if (blobRes2.ok) {
+                            var blobData2 = await blobRes2.json();
+                            if (blobData2.content) {
+                                return atob(blobData2.content);
+                            }
+                        }
+                    }
+                }
+            } catch (e2) {
+                console.warn('tree 兜底也失败:', e2);
+            }
+            throw new Error('文件过大（' + name + '），无法通过 Contents API 获取');
+        }
+        return text;
     }
 
     // 获取文件当前 sha（更新文件时必须带上）
@@ -111,7 +173,7 @@
     // 从云端拉取日记，与本地合并后写回（返回合并后的日记数组；失败返回 null）
     async function pullDiaries() {
         try {
-            var text = await getFile('diaries.json');
+            var text = await getFileWithRetry('diaries.json');
             var cloudArr = JSON.parse(text || '[]');
             var localArr = [];
             try { localArr = JSON.parse(localStorage.getItem('loveDiaries') || '[]'); } catch (e) {}
@@ -139,7 +201,7 @@
     // 从云端拉取图库，与本地合并后写回
     async function pullPhotos() {
         try {
-            var text = await getFile('gallery.json');
+            var text = await getFileWithRetry('gallery.json');
             var cloudArr = JSON.parse(text || '[]');
             var localArr = [];
             try { localArr = JSON.parse(localStorage.getItem('lovePhotos') || '[]'); } catch (e) {}
