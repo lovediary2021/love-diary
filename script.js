@@ -37,9 +37,13 @@ function getDiaries() {
     return diaries ? JSON.parse(diaries) : [];
 }
 
-// 保存日记到localStorage
+// 保存日记到localStorage（同时推送到云端，与对方共享）
 function saveDiaries(diaries) {
     localStorage.setItem('loveDiaries', JSON.stringify(diaries));
+    // 云端共享：异步推送到 GitHub 私有数据仓库，失败自动保留本地
+    if (window.LoveCloud) {
+        LoveCloud.pushDiaries(diaries);
+    }
 }
 
 // 生成唯一ID
@@ -450,6 +454,12 @@ function initDiaryPage() {
 // 页面加载时初始化
 document.addEventListener('DOMContentLoaded', () => {
     initDiaryPage();
+    // 云端共享：打开日记页时拉取对方保存的最新日记并刷新列表（仅日记页）
+    if (window.LoveCloud && document.getElementById('diaryList')) {
+        LoveCloud.pullDiaries().then(function (cloudDiaries) {
+            if (cloudDiaries) renderDiaries();
+        });
+    }
 });
 
 // 添加一些示例数据（如果localStorage为空）

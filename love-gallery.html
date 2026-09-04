@@ -47,6 +47,7 @@
         </div>
     </div>
 
+    <script src="data-sharing.js"></script>
     <script src="script.js"></script>
     <script>
         // 拖尾式光标跟随效果
@@ -122,9 +123,13 @@
             return photos ? JSON.parse(photos) : [];
         }
 
-        // 保存照片到localStorage
+        // 保存照片到localStorage（同时推送到云端，与对方共享）
         function savePhotos(photos) {
             localStorage.setItem('lovePhotos', JSON.stringify(photos));
+            // 云端共享：异步推送，失败自动保留本地
+            if (window.LoveCloud) {
+                LoveCloud.pushPhotos(photos);
+            }
         }
 
         // 渲染照片网格
@@ -425,6 +430,13 @@
 
         // 初始化页面
         renderPhotos();
+
+        // 云端共享：打开图库时拉取对方保存的最新照片并刷新（失败静默，不影响本地）
+        if (window.LoveCloud) {
+            LoveCloud.pullPhotos().then(function (cloudPhotos) {
+                if (cloudPhotos) renderPhotos();
+            });
+        }
     </script>
 </body>
 </html>
