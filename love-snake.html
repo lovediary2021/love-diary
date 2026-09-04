@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>恋爱贪吃蛇 - 祖家琦 ❤️ 王意颖</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #c2185b;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #ff69b4;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #ff1493;
+            transform: scale(1.05);
+        }
+
+        /* ===== 页面布局容器（桌面/横屏保持原样） ===== */
+        .top-bar {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .game-area {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .bottom-panel {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .item-hints-mobile {
+            display: none;
+        }
+
+        #gameCanvas {
+            border: 3px solid #c2185b;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 0 20px rgba(194, 24, 91, 0.3);
+            max-width: 100%;
+            height: auto;
+            touch-action: none;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
+            color: #c2185b;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .score {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+            color: #666;
+        }
+
+        .game-over {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            display: none;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .love-hint {
+            margin: 15px 0;
+            padding: 15px;
+            background: linear-gradient(135deg, #ffe6f0 0%, #ffebf0 100%);
+            border-radius: 10px;
+            border: 2px solid #ffcdd2;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes rainbow {
+            0% { border-color: #ff6b95; }
+            14% { border-color: #ff8e53; }
+            28% { border-color: #ffb347; }
+            42% { border-color: #cddc39; }
+            56% { border-color: #66bb6a; }
+            70% { border-color: #42a5f5; }
+            84% { border-color: #ab47bc; }
+            100% { border-color: #ef5350; }
+        }
+
+        .love-heart {
+            color: #c2185b;
+            margin: 0 5px;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .heartbeat {
+            animation: heartbeat 1s infinite;
+        }
+
+        .hint-level {
+            font-size: 1.1rem;
+            color: #c2185b;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .hint-level.level1 { opacity: 0.7; }
+        .hint-level.level2 { opacity: 0.85; }
+        .hint-level.level3 { opacity: 1; color: #ff1493; }
+
+        /* ===== 触控方向键 ===== */
+        .touch-controls {
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .touch-hint {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 72px);
+            grid-template-rows: repeat(3, 72px);
+            gap: 8px;
+            justify-content: center;
+            margin: 0 auto;
+            width: fit-content;
+        }
+
+        .dpad-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 16px;
+            border: 2px solid #ff69b4;
+            background: linear-gradient(135deg, #ff6b95, #ff8fab);
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            line-height: 1;
+        }
+
+        .dpad-btn:active {
+            transform: scale(0.92);
+            box-shadow: 0 2px 6px rgba(255, 105, 180, 0.4);
+        }
+
+        .dpad-btn.up { grid-column: 2; grid-row: 1; }
+        .dpad-btn.left { grid-column: 1; grid-row: 2; }
+        .dpad-btn.down { grid-column: 2; grid-row: 3; }
+        .dpad-btn.right { grid-column: 3; grid-row: 2; }
+
+        /* 横屏时画布适配屏幕高度（紧凑布局） */
+        @media (orientation: landscape) and (max-height: 600px) {
+            body {
+                padding: 8px;
+                height: 100vh;
+                height: 100dvh;
+                overflow: hidden;
+            }
+
+            .top-bar {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+                margin-bottom: 4px;
+                flex-shrink: 0;
+            }
+
+            .nav-buttons {
+                margin-bottom: 0;
+                gap: 6px;
+            }
+
+            .header {
+                margin-bottom: 0;
+            }
+
+            .header h1 {
+                font-size: 1.2rem;
+                margin: 0;
+            }
+
+            .header p {
+                display: none;
+            }
+
+            .back-button {
+                padding: 6px 14px;
+                margin-bottom: 0;
+                font-size: 0.85rem;
+            }
+
+            .controls {
+                display: none;
+            }
+
+            .game-area {
+                flex-shrink: 0;
+            }
+
+            .game-info {
+                margin-top: 6px;
+            }
+
+            .game-info .score {
+                font-size: 1.1rem;
+            }
+
+            #gameCanvas {
+                max-height: calc(100vh - 200px);
+                width: auto;
+                max-width: 100%;
+            }
+
+            .touch-controls {
+                display: block;
+                margin-top: 8px;
+            }
+
+            .touch-controls p {
+                display: none;
+            }
+
+            .dpad {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .dpad-btn {
+                width: 52px;
+                height: 52px;
+                font-size: 1.2rem;
+                border-radius: 12px;
+            }
+
+            .item-hints-mobile {
+                display: none;
+            }
+        }
+
+        /* 移动端优化：竖屏可游玩，上2/3游戏区，下1/3控制区 */
+        @media (max-width: 768px) and (orientation: portrait) {
+            body {
+                height: 100vh;
+                height: 100dvh;
+                overflow: hidden;
+                padding: 8px 12px;
+                box-sizing: border-box;
+            }
+
+            .top-bar {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+                margin-bottom: 6px;
+                flex-shrink: 0;
+            }
+
+            .nav-buttons {
+                margin-bottom: 0;
+                gap: 6px;
+            }
+
+            .nav-buttons .back-button {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+                margin-bottom: 0;
+            }
+
+            .header {
+                margin-bottom: 0;
+                text-align: right;
+            }
+
+            .header h1 {
+                font-size: 1.05rem;
+                margin: 0;
+            }
+
+            .header p {
+                display: none;
+            }
+
+            /* 上 2/3：贪吃蛇游戏区 */
+            .game-area {
+                flex: 2;
+                min-height: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+            }
+
+            #gameCanvas {
+                max-width: 100%;
+                max-height: 100%;
+                width: auto;
+                height: auto;
+            }
+
+            /* 下 1/3：控制区（得分 + 方向键 + 提示 + 道具说明） */
+            .bottom-panel {
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                overflow: hidden;
+            }
+
+            .game-info {
+                margin-top: 4px;
+                gap: 6px;
+                flex-shrink: 0;
+            }
+
+            .game-info .score {
+                font-size: 0.95rem;
+            }
+
+            .hint-level {
+                font-size: 0.8rem;
+                margin-top: 0;
+            }
+
+            .controls {
+                display: none;
+            }
+
+            .touch-controls {
+                margin-top: 0;
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .touch-controls p {
+                font-size: 0.75rem;
+                margin: 0 0 4px 0;
+            }
+
+            .dpad {
+                grid-template-columns: repeat(3, 42px);
+                grid-template-rows: repeat(3, 42px);
+                gap: 5px;
+            }
+
+            .dpad-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 1.1rem;
+                border-radius: 10px;
+            }
+
+            .item-hints-mobile {
+                display: block;
+                font-size: 0.72rem;
+                color: #888;
+                text-align: center;
+                padding: 2px 6px 4px;
+                flex-shrink: 0;
+                line-height: 1.5;
+            }
+
+            .game-over {
+                width: 92%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="nav-buttons">
+            <a href="games.html" class="back-button">返回游戏目录</a>
+            <a href="index.html" class="back-button" style="background: #999;">返回首页</a>
+        </div>
+
+        <div class="header">
+            <h1>恋爱贪吃蛇 <span class="love-heart">💕</span></h1>
+            <p>小蛇会变成爱心的形状！控制小蛇收集更多的爱心吧！</p>
+        </div>
+    </div>
+
+    <div class="game-area">
+        <canvas id="gameCanvas" width="500" height="500"></canvas>
+    </div>
+
+    <div class="bottom-panel">
+        <div class="game-info">
+            <div class="score">得分: <span id="score">0</span></div>
+            <div class="score">最高分: <span id="highScore">0</span></div>
+            <div class="hint-level" id="hintLevel" style="display: none;">
+                提示等级: <span id="hintLevelText"></span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <p>使用 W A S D 控制小蛇移动（W上 A左 S下 D右）</p>
+            <p>收集红色爱心获得分数！</p>
+            <p style="font-size: 0.9rem; color: #888; margin-top: 10px;">
+                💎 <strong>道具说明：</strong><br>
+                💎 <strong>10分道具</strong> - 拾取后立刻获得10分<br>
+                ✨ <strong>双倍得分道具</strong> - 120秒内所有得分翻倍
+            </p>
+            <p style="font-size: 0.9rem; color: #888; margin-top: 10px;">
+                🎯 <strong>新功能：</strong>蛇到达边缘时可以继续移动，给你反应时间转向！
+            </p>
+            <p id="hintDescription" style="font-size: 0.9rem; color: #888; margin-top: 10px;">
+                💡 提示：得分越高，恋人提示越明显！100分解锁初级提示哦~
+            </p>
+        </div>
+
+        <!-- 移动端触控方向键 -->
+        <div class="touch-controls" id="touchControls">
+            <p class="touch-hint">👆 滑动屏幕或点击方向键控制小蛇</p>
+            <div class="dpad">
+                <button class="dpad-btn up" data-dir="up" aria-label="上">▲</button>
+                <button class="dpad-btn left" data-dir="left" aria-label="左">◀</button>
+                <button class="dpad-btn down" data-dir="down" aria-label="下">▼</button>
+                <button class="dpad-btn right" data-dir="right" aria-label="右">▶</button>
+            </div>
+        </div>
+
+        <!-- 移动端道具说明（竖屏控制区底部） -->
+        <div class="item-hints-mobile">
+            💎 <strong>10分道具</strong>（+10分）　✨ <strong>双倍得分</strong>（120秒内得分翻倍）
+        </div>
+    </div>
+
+    <div id="gameOver" class="game-over">
+        <h2>游戏结束！</h2>
+        <p>最终得分: <span id="finalScore">0</span></p>
+        <button onclick="resetGame()" style="margin-top: 15px; padding: 10px 20px; background: #ff69b4; color: white; border: none; border-radius: 20px; cursor: pointer;">重新开始</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('highScore');
+        const gameOverElement = document.getElementById('gameOver');
+        const finalScoreElement = document.getElementById('finalScore');
+
+        // 游戏配置
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+        const bufferZone = 1; // 边缘缓冲区格子数
+
+        let snake = [
+            {x: 10, y: 10}
+        ];
+        let dx = 0;
+        let dy = 0;
+        let foodX = 15;
+        let foodY = 15;
+        let score = 0;
+        let highScore = localStorage.getItem('snakeHighScore') || 0;
+
+        // 道具系统
+        let items = [];
+        const itemTypes = ['score10', 'doubleScore']; // 10倍得分道具、双倍得分道具
+        let doubleScoreActive = false; // 双倍得分激活状态
+        let doubleScoreEndTime = 0; // 双倍得分结束时间
+
+        highScoreElement.textContent = highScore;
+
+        // 绘制爱心函数
+        function drawHeart(x, y, size) {
+            ctx.save();
+            ctx.translate(x + gridSize/2, y + gridSize/2);
+            ctx.scale(size/20, size/20);
+            ctx.fillStyle = '#c2185b';
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-10, -10, -20, -5, -10, 5);
+            ctx.bezierCurveTo(0, 10, 0, 20, 0, 20);
+            ctx.bezierCurveTo(0, 20, 0, 10, 10, 5);
+            ctx.bezierCurveTo(20, -5, 10, -10, 0, 0);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // 绘制游戏
+        function drawGame() {
+            // 清空画布
+            ctx.fillStyle = '#f5f5f5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 绘制蛇
+            snake.forEach((segment, index) => {
+                const size = index === 0 ? 18 : 16; // 蛇头稍大
+                drawHeart(segment.x * gridSize + 2, segment.y * gridSize + 2, size);
+            });
+
+            // 绘制食物
+            ctx.fillStyle = '#ff1744';
+            ctx.font = '20px Arial';
+            ctx.fillText('❤', foodX * gridSize, foodY * gridSize + 20);
+
+            // 绘制道具
+            items.forEach((item, index) => {
+                if (item.type === 'score10') {
+                    // 10倍得分道具 - 金色钻石
+                    ctx.fillStyle = '#FFD700';
+                    ctx.font = '18px Arial';
+                    ctx.fillText('💎', item.x * gridSize, item.y * gridSize + 20);
+                    // 添加"10分"文字提示
+                    ctx.fillStyle = '#FF0000';
+                    ctx.font = '12px Arial';
+                    ctx.fillText('+10', item.x * gridSize + 2, item.y * gridSize + 16);
+                } else if (item.type === 'doubleScore') {
+                    // 双倍得分道具 - 紫色星星
+                    ctx.fillStyle = '#9C27B0';
+                    ctx.font = '20px Arial';
+                    ctx.fillText('✨', item.x * gridSize, item.y * gridSize + 20);
+                    // 添加"双倍"文字提示
+                    ctx.fillStyle = '#FF1493';
+                    ctx.font = '12px Arial';
+                    ctx.fillText('双倍', item.x * gridSize + 2, item.y * gridSize + 16);
+                }
+            });
+
+            // 显示双倍得分状态
+            if (doubleScoreActive) {
+                const remainingTime = Math.ceil((doubleScoreEndTime - Date.now()) / 1000);
+                ctx.fillStyle = '#9C27B0';
+                ctx.font = '14px Arial';
+                ctx.fillText(`双倍得分: ${remainingTime}秒`, 10, 20);
+            }
+        }
+
+        // 移动蛇
+        function moveSnake() {
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+            // 边界检测（带缓冲区）
+            if (head.x < -bufferZone || head.x >= tileCount + bufferZone ||
+                head.y < -bufferZone || head.y >= tileCount + bufferZone) {
+                gameOver();
+                return;
+            }
+
+            // 自身碰撞检测
+            for (let segment of snake) {
+                if (head.x === segment.x && head.y === segment.y) {
+                    gameOver();
+                    return;
+                }
+            }
+
+            snake.unshift(head);
+
+            // 吃到食物
+            if (head.x === foodX && head.y === foodY) {
+                let points = 1;
+
+                // 应用双倍得分
+                if (doubleScoreActive) {
+                    points *= 2;
+                }
+
+                score += points;
+                scoreElement.textContent = score;
+
+                // 更新最高分
+                if (score > highScore) {
+                    highScore = score;
+                    highScoreElement.textContent = highScore;
+                    localStorage.setItem('snakeHighScore', highScore);
+                }
+
+                generateFood();
+            } else {
+                snake.pop();
+            }
+
+            // 吃到道具
+            for (let i = items.length - 1; i >= 0; i--) {
+                const item = items[i];
+                if (head.x === item.x && head.y === item.y) {
+                    applyItem(item);
+                    items.splice(i, 1);
+                }
+            }
+
+            // 检查双倍得分是否过期
+            if (doubleScoreActive && Date.now() > doubleScoreEndTime) {
+                doubleScoreActive = false;
+            }
+        }
+
+        // 更新提示等级显示
+        function updateHintLevel() {
+            const hintLevelDiv = document.getElementById('hintLevel');
+            const hintLevelText = document.getElementById('hintLevelText');
+
+            if (score < 100) {
+                hintLevelDiv.style.display = 'none';
+            } else if (score < 200) {
+                hintLevelDiv.style.display = 'block';
+                hintLevelDiv.className = 'hint-level level1';
+                hintLevelText.textContent = '💕 初级（朦胧）';
+            } else if (score < 300) {
+                hintLevelDiv.style.display = 'block';
+                hintLevelDiv.className = 'hint-level level2';
+                hintLevelText.textContent = '💖 中级（清晰）';
+            } else {
+                hintLevelDiv.style.display = 'block';
+                hintLevelDiv.className = 'hint-level level3';
+                hintLevelText.textContent = '💎 高级（明了）';
+            }
+        }
+
+        // 生成食物
+        function generateFood() {
+            // 食物生成在游戏区域内（不包括缓冲区）
+            foodX = Math.floor(Math.random() * tileCount);
+            foodY = Math.floor(Math.random() * tileCount);
+
+            // 确保食物不在蛇身上
+            for (let segment of snake) {
+                if (foodX === segment.x && foodY === segment.y) {
+                    generateFood();
+                    break;
+                }
+            }
+
+            // 随机生成道具
+            if (Math.random() < 0.1) { // 10%概率生成道具
+                generateItem();
+            }
+
+            // 更新提示等级
+            updateHintLevel();
+        }
+
+        // 生成道具
+        function generateItem() {
+            let x, y;
+            let validPosition = false;
+
+            // 道具生成在游戏区域内（不包括缓冲区）
+            while (!validPosition) {
+                x = Math.floor(Math.random() * tileCount);
+                y = Math.floor(Math.random() * tileCount);
+
+                validPosition = true;
+                for (let segment of snake) {
+                    if (x === segment.x && y === segment.y) {
+                        validPosition = false;
+                        break;
+                    }
+                }
+            }
+
+            // 随机选择道具类型
+            const randomType = itemTypes[Math.floor(Math.random() * itemTypes.length)];
+
+            items.push({
+                x: x,
+                y: y,
+                type: randomType
+            });
+        }
+
+        // 应用道具效果
+        function applyItem(item) {
+            if (item.type === 'score10') {
+                // 10倍得分效果：立刻增加10分
+                score += 10;
+                scoreElement.textContent = score;
+
+                // 更新最高分
+                if (score > highScore) {
+                    highScore = score;
+                    highScoreElement.textContent = highScore;
+                    localStorage.setItem('snakeHighScore', highScore);
+                }
+
+                // 显示提示
+                showNotification('💎 获得10分！');
+            } else if (item.type === 'doubleScore') {
+                // 双倍得分效果，持续120秒
+                doubleScoreActive = true;
+                doubleScoreEndTime = Date.now() + 120000; // 120秒
+
+                // 显示提示
+                showNotification('✨ 获得120秒双倍得分！');
+            }
+        }
+
+        // 显示通知
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.position = 'fixed';
+            notification.style.top = '50%';
+            notification.style.left = '50%';
+            notification.style.transform = 'translate(-50%, -50%)';
+            notification.style.background = 'rgba(255, 182, 193, 0.95)';
+            notification.style.color = '#c2185b';
+            notification.style.padding = '20px';
+            notification.style.borderRadius = '10px';
+            notification.style.fontSize = '18px';
+            notification.style.fontWeight = 'bold';
+            notification.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+            notification.style.zIndex = '10000';
+            notification.textContent = message;
+            notification.style.animation = 'pulse 1s ease-in-out infinite';
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s';
+                setTimeout(() => notification.remove(), 500);
+            }, 2000);
+        }
+
+        // "永远的爱情"提示词
+        const loveHints = {
+            level1: [ // 最不明显的提示（100-200分）
+                "时间静止的瞬间",
+                "心跳的永恒节拍",
+                "四季不变的陪伴",
+                "掌心的温度",
+                "无声的理解",
+                "永恒的港湾",
+                "温暖的怀抱",
+                "心灵的共鸣",
+                "灵魂的契约",
+                "时间的见证者",
+                "岁月的见证人",
+                "生命的旅程",
+                "温暖的阳光",
+                "细雨的滋润",
+                "微风的轻抚",
+                "花开的声音",
+                "叶落的舞蹈",
+                "星空的璀璨",
+                "月光的皎洁"
+            ],
+            level2: [ // 第二档提示（200-300分）
+                "比时间更长的陪伴",
+                "比誓言更深的承诺",
+                "永恒的相守",
+                "不变的真心",
+                "永远的守护",
+                "一生的承诺",
+                "无尽的温柔",
+                "永恒的温暖",
+                "一生的相伴",
+                "不变的情感",
+                "永远的牵挂",
+                "一生的承诺",
+                "永恒的依恋",
+                "一生的温柔",
+                "永恒的思念",
+                "一生的守护",
+                "不变的心跳",
+                "永远的陪伴",
+                "永恒的誓言",
+                "一生的爱恋",
+                "永恒的守候",
+                "永远的牵绊",
+                "forever love",
+                "永恒的温柔",
+                "一生的誓言"
+            ],
+            level3: [ // 最明显的提示（300分以上）
+                "四个字，代表一生",
+                " longest love",
+                "forever + love",
+                "永恒的爱情",
+                "永远的相爱",
+                "一生一世的爱",
+                "直到永远的爱",
+                "永不停息的爱",
+                "永恒不变的爱",
+                "永远的承诺",
+                "forever love",
+                "永远的归属",
+                "永恒的陪伴",
+                "一生一世的情",
+                "直到永远的诺言",
+                "永恒的心动",
+                "永远的依偎",
+                "一生的爱恋",
+                "永恒的守候",
+                "永远的牵绊",
+                "forever love",
+                "永恒的誓言",
+                "一生的温柔",
+                "永远的爱情",
+                "Forever Love",
+                "eternal love",
+                "unending love",
+                "boundless love"
+            ],
+            special: [ // 400分以上的特殊彩蛋提示
+                "🎉 恭喜你达到了永恒之境！",
+                "💖 你的爱已经超越了时间",
+                "✨ 祖家琦和王意颖的爱情密码",
+                "🌟 恒久不变的四个字",
+                "💝 藏在游戏中的爱情宣言",
+                "🎊 恭喜解锁隐藏成就！"
+            ]
+        };
+
+        // 游戏结束
+        function gameOver() {
+            finalScoreElement.textContent = score;
+            gameOverElement.style.display = 'block';
+
+            // 先移除上一次的提示，保证每次只显示一个随机提示词
+            gameOverElement.querySelectorAll('.love-hint').forEach(hint => hint.remove());
+
+            // 根据分数所在的档位，随机抽取一条提示
+            let hintMessage = '';
+            let isSpecial = false;
+
+            // 400分以上的特殊彩蛋
+            if (score >= 400) {
+                const randomIndex = Math.floor(Math.random() * loveHints.special.length);
+                hintMessage = loveHints.special[randomIndex];
+                isSpecial = true;
+            }
+            // 300分以上的第三档提示
+            else if (score >= 300) {
+                const randomIndex = Math.floor(Math.random() * loveHints.level3.length);
+                hintMessage = loveHints.level3[randomIndex];
+            }
+            // 200-299分的第二档提示
+            else if (score >= 200) {
+                const randomIndex = Math.floor(Math.random() * loveHints.level2.length);
+                hintMessage = loveHints.level2[randomIndex];
+            }
+            // 100-199分的第一档提示
+            else if (score >= 100) {
+                const randomIndex = Math.floor(Math.random() * loveHints.level1.length);
+                hintMessage = loveHints.level1[randomIndex];
+            }
+
+            // 如果有提示，添加到游戏结束界面（只添加一个）
+            if (hintMessage) {
+                const hintDiv = document.createElement('div');
+                hintDiv.className = 'love-hint';
+
+                if (isSpecial) {
+                    // 彩蛋提示框用彩虹边框特效
+                    hintDiv.style.background = 'linear-gradient(135deg, #ffd6e0 0%, #ffebf5 100%)';
+                    hintDiv.style.border = '3px solid #ff69b4';
+                    hintDiv.style.animation = 'pulse 1s ease-in-out infinite, rainbow 3s linear infinite';
+                    hintDiv.innerHTML = `<strong>🎊 ${hintMessage}</strong>`;
+                } else {
+                    hintDiv.innerHTML = `<strong>💕 恋人提示：</strong>${hintMessage}`;
+                }
+
+                gameOverElement.querySelector('h2').insertAdjacentHTML('afterend', hintDiv.outerHTML);
+            }
+        }
+
+        // 重置游戏
+        function resetGame() {
+            snake = [{x: 10, y: 10}];
+            dx = 0;
+            dy = 0;
+            score = 0;
+            scoreElement.textContent = score;
+            gameOverElement.style.display = 'none';
+            items = [];
+            doubleScoreActive = false;
+            doubleScoreEndTime = 0;
+
+            // 清除之前添加的提示
+            gameOverElement.querySelectorAll('.love-hint').forEach(hint => hint.remove());
+
+            generateFood();
+        }
+
+        // 统一的方向设置（防止直接反向）
+        function setDirection(ndx, ndy) {
+            if (gameOverElement.style.display === 'block') return;
+            if (ndx !== 0 && ndx === -dx) return;
+            if (ndy !== 0 && ndy === -dy) return;
+            dx = ndx;
+            dy = ndy;
+        }
+
+        function handleDir(dir) {
+            switch(dir) {
+                case 'up': setDirection(0, -1); break;
+                case 'down': setDirection(0, 1); break;
+                case 'left': setDirection(-1, 0); break;
+                case 'right': setDirection(1, 0); break;
+            }
+        }
+
+        // 键盘控制
+        document.addEventListener('keydown', (e) => {
+            switch(e.key.toLowerCase()) {
+                case 'w': handleDir('up'); break;
+                case 's': handleDir('down'); break;
+                case 'a': handleDir('left'); break;
+                case 'd': handleDir('right'); break;
+            }
+        });
+
+        // 虚拟方向键（移动端）
+        document.querySelectorAll('.dpad-btn').forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handleDir(btn.dataset.dir);
+            });
+            btn.addEventListener('click', () => {
+                handleDir(btn.dataset.dir);
+            });
+        });
+
+        // 滑动控制（在画布上滑动改变方向）
+        let touchStartX = 0;
+        let touchStartY = 0;
+        canvas.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, {passive: true});
+        canvas.addEventListener('touchend', (e) => {
+            const deltaX = e.changedTouches[0].clientX - touchStartX;
+            const deltaY = e.changedTouches[0].clientY - touchStartY;
+            const threshold = 30;
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold) {
+                handleDir(deltaX > 0 ? 'right' : 'left');
+            } else if (Math.abs(deltaY) > threshold) {
+                handleDir(deltaY > 0 ? 'down' : 'up');
+            }
+        }, {passive: true});
+
+        // 游戏循环
+        function gameLoop() {
+            if (dx !== 0 || dy !== 0) {
+                moveSnake();
+            }
+            drawGame();
+        }
+
+        // 初始化游戏
+        drawGame();
+        setInterval(gameLoop, 200); // 游戏速度调整为200毫秒
+    </script>
+</body>
+</html>
